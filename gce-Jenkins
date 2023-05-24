@@ -19,9 +19,24 @@
         }
         stage('Create Instance') {
             steps {
-                sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c --quiet'
+                sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
             }
         }
         
+        stage('Collect External IP')
+        {
+          steps{
+           sh "gcloud compute instances describe gcp-vm -zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
+           sh 'cat ip.txt'
+          }
+        }
+        
+        stage ('App Health Check')
+        {
+          steps{
+            sh 'sleep 300'
+            sh 'curl http://$(cat ip.txt)/8080/hello'
+          }
+        }               
     } 
 }
