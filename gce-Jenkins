@@ -19,7 +19,7 @@
         }
         stage('Create Instance') {
             steps {
-                sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c'
+                sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c --quiet'
             }
         }
         
