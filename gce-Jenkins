@@ -26,7 +26,7 @@
         stage('Collect External IP')
         {
           steps{
-           sh "gcloud compute instances describe gcp-vm -zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
+           sh "gcloud compute instances describe gcp-vm --zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
            sh 'cat ip.txt'
           }
         }
