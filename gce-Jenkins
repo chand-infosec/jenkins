@@ -3,7 +3,7 @@
      environment{
          SVC_ACCOUNT_KEY = credentials('dev-auth')
      }
- }
+ 
     stages{
         stage('Set Creds'){
             steps {
@@ -14,13 +14,14 @@
         
         stage ('Auth Project') {
             steps {
-                sh 'gcloud auth activte-service-account cbs-dev-iamsa@cbs-dev-387107.iam.gserviceaccount.com --key-file=jenkins.json'
+                sh 'gcloud auth activate-service-account cbs-dev-iamsa@cbs-dev-387107.iam.gserviceaccount.com --key-file=jenkins.json'
             }
         }
         stage('Create Instance') {
-            steps { 
-                sh 'gcloud gcp-vm --zone=us-central1-c'
+            steps {
+                sh 'gcloud compute instances create gcp-vm --zone=us-central1-c'
             }
         }
-       
+        
     } 
+}
