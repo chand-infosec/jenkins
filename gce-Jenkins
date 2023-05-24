@@ -35,7 +35,7 @@
         {
           steps{
             sh 'sleep 300'
-            sh 'curl http://$(cat ip.txt)/8080/hello'
+            sh 'curl http://$(cat ip.txt):8080/hello'
           }
         }               
     } 
