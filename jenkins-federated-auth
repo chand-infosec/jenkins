@@ -1,59 +1,63 @@
- pipeline {
-     agent any
-     environment{
-         SVC_ACCOUNT_KEY_DEV = credentials('dev-auth')
-         SVC_ACCOUNT_KEY_UAT = credentials('uat-auth')
-         
-         PROJECT_DEV = 'cbs-dev-387107'
-         PROJECT_UAT = 'cbs-uat'        
-     }
- 
-    stages{
-        stage('Set Creds'){
+pipeline {
+    agent any
+
+    environment {
+        SVC_ACCOUNT_KEY_DEV = credentials('dev-auth')
+        SVC_ACCOUNT_KEY_UAT = credentials('uat-auth')
+
+        PROJECT_DEV = 'cbs-dev-387107'
+        PROJECT_UAT = 'cbs-uat'
+    }
+
+    stages {
+        stage('Set Creds') {
             steps {
-                if ($ENV == 'DEV') {  
-                  sh 'echo $SVC_ACCOUNT_KEY_DEV | base64 -d > ./cbs-dev-iamsa.json'
-                  sh 'pwd'
-                }            
-                if ($ENV == 'UAT') {  
-                  sh 'echo $SVC_ACCOUNT_KEY_UAT | base64 -d > ./jenkins-sa-uat.json'
-                  sh 'pwd'
-                } 
+                script {
+                    if (ENV == 'DEV') {
+                        sh 'echo $SVC_ACCOUNT_KEY_DEV | base64 -d > ./cbs-dev-iamsa.json'
+                        sh 'pwd'
+                    }
+                    if (ENV == 'UAT') {
+                        sh 'echo $SVC_ACCOUNT_KEY_UAT | base64 -d > ./jenkins-sa-uat.json'
+                        sh 'pwd'
+                    }
+                }
             }
         }
-        
-        stage ('Auth Project') {
+
+        stage('Auth Project') {
             steps {
-             if ($ENV == 'DEV') {  
-                 sh 'gcloud auth activate-service-account cbs-dev-iamsa@cbs-dev-387107.iam.gserviceaccount.com --key-file=cbs-dev-iamsa.json'
-                 gcloud config set project ${env.PROJECT_DEV}
-              }
-              if ($ENV == 'UAT') {
-                 sh 'gcloud auth activate-service-account sa-cbs-uat@cbs-uat.iam.gserviceaccount.com --key-file=jenkins-sa-uat.json'
-                 sh 'gcloud config set project $PROJECT_UAT'
-              }
+                script {
+                    if (ENV == 'DEV') {
+                        sh 'gcloud auth activate-service-account cbs-dev-iamsa@cbs-dev-387107.iam.gserviceaccount.com --key-file=cbs-dev-iamsa.json'
+                        sh "gcloud config set project ${env.PROJECT_DEV}"
+                    }
+                    if (ENV == 'UAT') {
+                        sh 'gcloud auth activate-service-account sa-cbs-uat@cbs-uat.iam.gserviceaccount.com --key-file=jenkins-sa-uat.json'
+                        sh "gcloud config set project ${PROJECT_UAT}"
+                    }
+                }
             }
         }
+
         stage('Create Instance') {
-            steps {            
-                   sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'                   
+            steps {
+                sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
             }
         }
-        
-        stage('Collect External IP')
-        {
-          steps{
-           sh "gcloud compute instances describe gcp-vm --zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
-           sh 'cat ip.txt'
-          }
+
+        stage('Collect External IP') {
+            steps {
+                sh "gcloud compute instances describe gcp-vm --zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
+                sh 'cat ip.txt'
+            }
         }
-        
-        stage ('App Health Check')
-        {
-          steps{
-            sh 'sleep 300'
-            sh 'curl http://$(cat ip.txt):8080/hello'
-          }
-        }               
-    } 
+
+        stage('App Health Check') {
+            steps {
+                sh 'sleep 300'
+                sh 'curl http://$(cat ip.txt):8080/hello'
+            }
+        }
+    }
 }
