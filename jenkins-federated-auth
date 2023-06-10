@@ -34,7 +34,7 @@ pipeline {
                     }
                     if (ENV == 'UAT') {
                         sh 'gcloud auth activate-service-account sa-cbs-uat@cbs-uat.iam.gserviceaccount.com --key-file=jenkins-sa-uat.json'
-                       sh "gcloud config set project ${PROJECT_UAT}"
+                        sh "gcloud config set project ${PROJECT_UAT}"
                     }
                 }
             }
@@ -43,12 +43,12 @@ pipeline {
         stage('Create Instance') {
             steps {
                 script {
-                    if (ACTION == 'create')
+                    if (ACTION == 'create') {
                         sh 'gcloud compute instances $ACTION gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
                     }
-                    if (ACTION == 'delete')
+                    if (ACTION == 'delete') {
                         sh 'gcloud compute instances $ACTION gcp-vm --zone=us-central1-c'
-                    }                    
+                    }
                 }
             }
         }
@@ -56,7 +56,7 @@ pipeline {
         stage('Collect External IP') {
             steps {
                 script {
-                    if (ACTION == 'create'){
+                    if (ACTION == 'create') {
                         sh "gcloud compute instances describe gcp-vm --zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
                         sh 'cat ip.txt'
                     }
@@ -67,7 +67,7 @@ pipeline {
         stage('App Health Check') {
             steps {
                 script {
-                    if (ACTION == 'create'){
+                    if (ACTION == 'create') {
                         sh 'sleep 150'
                         sh 'curl http://$(cat ip.txt):8080/hello'
                     }
