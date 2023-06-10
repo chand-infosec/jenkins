@@ -42,21 +42,36 @@ pipeline {
 
         stage('Create Instance') {
             steps {
-                sh 'gcloud compute instances $ACTION gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
+                script {
+                    if (ACTION == 'create')
+                        sh 'gcloud compute instances $ACTION gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
+                    }
+                    if (ACTION == 'delete')
+                        sh 'gcloud compute instances $ACTION gcp-vm --zone=us-central1-c'
+                    }                    
+                }
             }
         }
 
         stage('Collect External IP') {
             steps {
-                sh "gcloud compute instances describe gcp-vm --zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
-                sh 'cat ip.txt'
+                script {
+                    if (ACTION == 'create'){
+                        sh "gcloud compute instances describe gcp-vm --zone=us-central1-c --format='get(networkInterfaces[0].accessConfigs[0].natIP)' > ip.txt"
+                        sh 'cat ip.txt'
+                    }
+                }
             }
         }
 
         stage('App Health Check') {
             steps {
-                sh 'sleep 150'
-                sh 'curl http://$(cat ip.txt):8080/hello'
+                script {
+                    if (ACTION == 'create'){
+                        sh 'sleep 150'
+                        sh 'curl http://$(cat ip.txt):8080/hello'
+                    }
+                }
             }
         }
     }
