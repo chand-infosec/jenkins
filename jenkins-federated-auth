@@ -30,11 +30,11 @@ pipeline {
                 script {
                     if (ENV == 'DEV') {
                         sh 'gcloud auth activate-service-account cbs-dev-iamsa@cbs-dev-387107.iam.gserviceaccount.com --key-file=cbs-dev-iamsa.json'
-                        sh "gcloud config set project ${env.PROJECT_DEV}"
+                        //sh "gcloud config set project ${env.PROJECT_DEV}"
                     }
                     if (ENV == 'UAT') {
                         sh 'gcloud auth activate-service-account sa-cbs-uat@cbs-uat.iam.gserviceaccount.com --key-file=jenkins-sa-uat.json'
-                        sh "gcloud config set project ${PROJECT_UAT}"
+                       // sh "gcloud config set project ${PROJECT_UAT}"
                     }
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
 
         stage('Create Instance') {
             steps {
-                sh 'gcloud compute instances $ACTIONS gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
+                sh 'gcloud compute instances $ACTION gcp-vm --zone=us-central1-c --quiet --tags=http-server --metadata-from-file=startup-script=./scripts/gce.sh'
             }
         }
 
