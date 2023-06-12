@@ -68,7 +68,7 @@ pipeline {
             steps {
                 script {
                     if (ACTION == 'create') {
-                        sh 'sleep 150'
+                        sh 'sleep 90'
                         sh 'curl http://$(cat ip.txt):8080/hello'
                     }
                 }
