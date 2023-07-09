@@ -43,7 +43,7 @@ pipeline {
        stage('DAST Baseline Scan') {
             steps {
                 sshagent(['zap']){
-                    sh 'ssh -o StrictHostKeyChecking=no chand_infosec@130.211.193.19 "docker run -t owasp/zap2docker-stable zap-baseline -t http://130.211.193.19/mutillidae" '
+                    sh 'ssh -o StrictHostKeyChecking=no gcpvmsshuser@130.211.193.19 "docker run -t owasp/zap2docker-stable zap-baseline -t http://130.211.193.19/mutillidae" '
                 }
             }
         }
