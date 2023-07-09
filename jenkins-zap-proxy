@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    environment {
+        SVC_ACCOUNT_KEY_DEV = credentials('dev-auth')
+        SVC_ACCOUNT_KEY_UAT = credentials('uat-auth')
+
+        PROJECT_DEV = 'cbs-dev-387107'
+        PROJECT_UAT = 'cbs-uat'
+    }
+
+    stages {
+        stage('Set Creds') {
+            steps {
+                script {
+                    if (ENV == 'DEV') {
+                        sh 'echo $SVC_ACCOUNT_KEY_DEV | base64 -d > ./cbs-dev-iamsa.json'
+                        sh 'pwd'
+                    }
+                    if (ENV == 'UAT') {
+                        sh 'echo $SVC_ACCOUNT_KEY_UAT | base64 -d > ./jenkins-sa-uat.json'
+                        sh 'pwd'
+                    }
+                }
+            }
+        }
+
+        stage('Auth Project') {
+            steps {
+                script {
+                    if (ENV == 'DEV') {
+                        sh 'gcloud auth activate-service-account cbs-dev-iamsa@cbs-dev-387107.iam.gserviceaccount.com --key-file=cbs-dev-iamsa.json'
+                        sh "gcloud config set project ${env.PROJECT_DEV}"
+                    }
+                    if (ENV == 'UAT') {
+                        sh 'gcloud auth activate-service-account sa-cbs-uat@cbs-uat.iam.gserviceaccount.com --key-file=jenkins-sa-uat.json'
+                        sh "gcloud config set project ${PROJECT_UAT}"
+                    }
+                }
+            }
+        }
+
+       stage('DAST Baseline Scan') {
+            steps {
+                script {                   
+                  sshagent(['zap-ssh']){
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@130.211.193.19 "docker run -t owasp/zap2docker-stable zap-baseline -t http://130.211.193.19/mutillidae" '
+                  }  
+                }
+            }
+        }
+    }
+}
