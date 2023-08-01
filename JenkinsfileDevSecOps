@@ -5,6 +5,11 @@ pipeline
     maven 'Maven'
   }
   stages{
+    stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+      }
     stage ('Initialize') {
       steps{
         sh '''
