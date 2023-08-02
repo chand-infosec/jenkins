@@ -52,6 +52,17 @@ pipeline
       }
     }
 
+ stage('Quality Gate') {
+    steps {
+        script {
+            def qualityGate = waitForQualityGate() // Waits for the SonarQube analysis to complete and returns the quality gate status
+            if (qualityGate.status != 'OK') {
+                error "Quality Gate failed: ${qualityGate.status}"
+            }
+        }
+    }
+ }
+
   stage ('Build') {
       steps{
         sh 'mvn clean package'        
