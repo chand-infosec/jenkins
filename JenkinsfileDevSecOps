@@ -29,5 +29,12 @@ pipeline
         sh 'mvn clean package'        
       }
     }
+  stage('Deploy to tomcat') {
+            steps {
+              sshagent(['tomcat'])
+                sh 'scp -o StrictHostKeyChecking=no -o target/*.*ar jenkinsdevsecops@http://34.125.188.8/home/jenkinsdevsecops/prod/tomcat/webapps/webapp.war'
+            }
+  }
+
   }
 }
