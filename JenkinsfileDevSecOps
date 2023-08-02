@@ -21,7 +21,7 @@ pipeline
     }
   stage('Retrieve Source Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/ishaq-md/jar.git'
+                git branch: 'master', url: 'https://github.com/chand-infosec/webapp.git'
             }
   }
   stage ('Build') {
