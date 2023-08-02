@@ -30,8 +30,8 @@ pipeline
       }
     }
   stage('Deploy to tomcat') {
-            steps {
-              sshagent(['tomcat'])
+            steps {              
+               sshagent(credentials: ['tomcat']) {
                 sh 'scp -o StrictHostKeyChecking=no -o target/*.*ar jenkinsdevsecops@http://34.125.188.8/home/jenkinsdevsecops/prod/tomcat/webapps/webapp.war'
             }
   }
